@@ -1,5 +1,5 @@
 local logging = require("logging")
-local logger = logging.getLogger("{{mod_id}}")
+local logger = logging.getLogger("{{cookiecutter.mod_id}}")
 
 local function on_enable()
 end
