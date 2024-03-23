@@ -1,0 +1,11 @@
+{
+    "id": "{{cookiecutter.mod_id}}",
+    "name": "{{cookiecutter.name}}",
+    "version": "{{cookiecutter.version}}",
+    "description": [
+        "{{cookiecutter.description}}"
+    ],
+    "author": "{{cookiecutter.author}}",
+    "load_before": [],
+    "load_after": []
+}
