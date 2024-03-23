@@ -1,0 +1,7 @@
+{
+    "mod_id": "test_mod",
+    "name": "Test Mod",
+    "version": "1.0.0",
+    "description": "This is a test mod.",
+    "author": "Author"
+}
