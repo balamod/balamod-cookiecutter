@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - v*
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install jq
+      uses: dcarbone/install-jq-action@v2.1.0
+    - name: update version
+      run: |
+        jq '.version = $ENV.GITHUB_REF' '{{cookiecutter.mod_id}}/manifest.json' > '{{cookiecutter.mod_id}}/manifest.json'
+        git add '{{cookiecutter.mod_id}}/manifest.json'
+        git commit -m "bump version to $GITHUB_REF"
+        git push
