@@ -1,12 +1,17 @@
-MOD_ID = {{cookiecutter.mod_id}}
+MOD_ID := {{cookiecutter.mod_id}}
 
 .PHONY: build clean install
 
 build:
-	tar czvf $(MOD_ID).tar.gz main.lua assets localization manifest.json
+	rm -rf build
+	mkdir -p build
+	cp -rf * build/
+	cd build && rm -rf $(cat .balamodignore | tr '\n' ' ') && rm -f .balamodignore && rm -rf $(cat .gitignore | tr '\n' ' ')
+	cd build && find . -exec tar czvf $(MOD_ID) {} +
 
 clean:
 	rm -f $(MOD_ID).tar.gz
+	rm -rf build
 
 install:
 	if [ uname -s = "Darwin" ]; then \

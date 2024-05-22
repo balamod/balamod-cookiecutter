@@ -1,0 +1,10 @@
+.github
+.editorconfig
+.gitignore
+.git
+.gitattributes
+.gitmodules
+Makefile
+**/.gitkeep
+README.md
+*.tar.gz

@@ -3,5 +3,8 @@
     "name": "Test Mod",
     "version": "1.0.0",
     "description": "This is a test mod.",
-    "author": "Author"
+    "author": "Author",
+    "_copy_without_render": [
+        ".github/workflows/*"
+    ]
 }

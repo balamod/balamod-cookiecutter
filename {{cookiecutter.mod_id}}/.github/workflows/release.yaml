@@ -1,22 +1,58 @@
 on:
-  push:
-    branches:
-    - master
-    tags:
-    - v*
+  release:
+    types:
+      - created
+
+permissions:
+  contents: write
 
 jobs:
+  get-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload-url: ${{ steps.get_current_release.outputs.upload_url }}
+    steps:
+      - name: Get Current Release
+        id: get_current_release
+        uses: joutvhu/get-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: get-release
     steps:
-    - name: Checkout
+    - name: ⬇️ Checkout
       uses: actions/checkout@v4
-    - name: Install jq
+    - name: ⬇️ Install jq
       uses: dcarbone/install-jq-action@v2.1.0
-    - name: update version
+    - name: ⚙️ Setup environment
+      id: env
       run: |
-        jq '.version = $ENV.GITHUB_REF' '{{cookiecutter.mod_id}}/manifest.json' > '{{cookiecutter.mod_id}}/manifest.json'
-        git add '{{cookiecutter.mod_id}}/manifest.json'
+        MOD_ID=$(jq -r '.id' 'manifest.json')
+        REMOTE=$(git remote show | cut -d' ' -f1)
+        DEFAULT_BRANCH=$(git remote show $REMOTE | sed -n '/HEAD branch/s/.*: //p')
+        echo "ignored-files=$(cat '.balamodignore' | tr '\n' ' ')" >> $GITHUB_OUTPUT
+        echo "mod-id=$MOD_ID" >> $GITHUB_OUTPUT
+        echo "remote=$REMOTE" >> $GITHUB_OUTPUT
+        echo "default-branch=$DEFAULT_BRANCH" >> $GITHUB_OUTPUT
+
+    - name: 📝 Update mod version from git tag
+      run: |
+        jq '.version = $ENV.GITHUB_REF' 'manifest.json' > 'manifest.json'
+        git add manifest.json
         git commit -m "bump version to $GITHUB_REF"
-        git push
+        git push ${{steps.env.outputs.remote}} ${{steps.env.outputs.default-branch}}
+
+    - name: 📦 Package mod into tarball
+      run: make build
+
+    - name: 🚀 Push mod package to release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.get-release.outputs.upload-url }}
+        asset_path: 'build/${{steps.env.mod-id}}.tar.gz'
+        asset_name: '${{steps.env.mod-id}}.tar.gz'
+        asset_content_type: application/octet-stream
